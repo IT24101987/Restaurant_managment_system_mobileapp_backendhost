@@ -56,13 +56,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendDir = path.join(__dirname, "..", "frontend");
 
-app.use((req, res, next) => {
-  while (req.url === "/api" || req.url.startsWith("/api/")) {
-    req.url = req.url.replace(/^\/api/, "") || "/";
-  }
-  next();
-});
-
 if (fs.existsSync(frontendDir)) {
   app.use(express.static(frontendDir));
 }
@@ -92,14 +85,23 @@ app.use((req, res, next) => {
 });
 
 app.use(authRoutes);
+app.use('/api', authRoutes);
 app.use(catalogRoutes);
+app.use('/api', catalogRoutes);
 app.use(orderRoutes);
+app.use('/api', orderRoutes);
 app.use(paymentRoutes);
+app.use('/api', paymentRoutes);
 app.use(tableRoutes);
+app.use('/api', tableRoutes);
 app.use(tableReservationRoutes);
+app.use('/api', tableReservationRoutes);
 app.use(dishRoutes);
+app.use('/api', dishRoutes);
 app.use(reviewRoutes);
+app.use('/api', reviewRoutes);
 app.use(adminRoutes);
+app.use('/api', adminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
