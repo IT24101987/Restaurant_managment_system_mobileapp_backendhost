@@ -58,8 +58,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Restaurant Management System API" });
 });
 
-app.get("/api", (req, res) => {
-  res.json({ message: "Restaurant Management System API" });
+app.get("/api/health", (req, res) => {
+  res.json({
+    message: "API is healthy",
+    database: isDatabaseReady ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.use(authenticateUser);
