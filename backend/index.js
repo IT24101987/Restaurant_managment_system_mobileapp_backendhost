@@ -17,12 +17,11 @@ import dishRoutes from "./routes/dishRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 
 const app = express();
-app.set("trust proxy", 1);
 
 let isDatabaseReady = false;
 
 if (!config.mongodbURI) {
-  console.error("MONGODB_URI is missing. Set it in .env and restart the server.");
+  console.error("MONGODB_URI is missing. Set it in backend/.env and restart the server.");
 } else {
   mongoose.connect(config.mongodbURI)
     .then(() => {
@@ -65,8 +64,8 @@ app.use("/register", authLimiter);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// const frontendDir = path.join(__dirname, "frontend");
-// app.use(express.static(frontendDir));
+const frontendDir = path.join(__dirname, "..", "frontend");
+app.use(express.static(frontendDir));
 
 app.use(authenticateUser);
 app.use((req, res, next) => {
@@ -109,11 +108,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
-// Export the app for Vercel
-export default app;
-
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(config.port, () => {
-    console.log(`Server started on port ${config.port}`);
-  });
-}
+app.listen(config.port, () => {
+  console.log(`Server started on port ${config.port}`);
+});
