@@ -106,15 +106,6 @@ app.use((req, res, next) => {
 
 // app.use('/api', authRoutes);
 app.use('/api', authRoutes);
-// Temporarily comment out all routes for debugging
-// app.use('/api', catalogRoutes);
-// app.use('/api', orderRoutes);
-// app.use('/api', paymentRoutes);
-// app.use('/api', tableRoutes);
-// app.use('/api', tableReservationRoutes);
-// app.use('/api', dishRoutes);
-// app.use('/api', reviewRoutes);
-// app.use('/api', adminRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
