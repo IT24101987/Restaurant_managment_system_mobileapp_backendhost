@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
+import fs from "fs";
 import config from "./config.js";
 import authenticateUser from "./middlewares/authentication.js";
 import path from 'path';
@@ -54,7 +55,21 @@ app.use(cors({
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendDir = path.join(__dirname, "..", "frontend");
-app.use(express.static(frontendDir));
+
+app.use((req, res, next) => {
+  if (req.url.startsWith("/api")) {
+    req.url = req.url.replace(/^\/api/, "") || "/";
+  }
+  next();
+});
+
+if (fs.existsSync(frontendDir)) {
+  app.use(express.static(frontendDir));
+}
+
+app.get(["/", "/api"], (req, res) => {
+  res.json({ message: "Restaurant Management System API" });
+});
 
 app.use(authenticateUser);
 app.use((req, res, next) => {
