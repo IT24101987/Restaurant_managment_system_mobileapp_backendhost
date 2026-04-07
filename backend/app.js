@@ -39,6 +39,12 @@ mongoose.connection.on("connected", () => { isDatabaseReady = true; });
 
 app.use(express.json({ limit: "15mb" }));
 
+// Add request logging for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
 const allowLocalhostPort = /^http:\/\/localhost:517\d$/;
 app.use(cors({
   origin: (origin, callback) => {
@@ -54,9 +60,10 @@ app.use(cors({
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.get("/", (req, res) => {
-  res.json({ message: "Restaurant Management System API" });
-});
+// Temporarily remove root route handler for debugging
+// app.get("/", (req, res) => {
+//   res.json({ message: "Restaurant Management System API" });
+// });
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -85,6 +92,7 @@ app.use((req, res, next) => {
 
 
 // app.use('/api', authRoutes);
+app.use('/api', authRoutes);
 app.use('/api', catalogRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', paymentRoutes);
@@ -94,8 +102,10 @@ app.use('/api', dishRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', adminRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
+// Add catch-all route for debugging
+app.use('*', (req, res) => {
+  console.log(`Catch-all: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ message: "Route not found", path: req.originalUrl });
 });
 
 app.use((err, req, res, next) => {

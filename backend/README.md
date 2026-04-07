@@ -35,12 +35,12 @@ After deployment, test these endpoints:
 
 - `https://your-app.vercel.app/api/health` - Health check
 - `https://your-app.vercel.app/api/test` - Test route
-- `https://your-app.vercel.app/api/login` - Login endpoint
+- `https://your-app.vercel.app/api/login` - Login endpoint (auth routes re-enabled)
 - `https://your-app.vercel.app/api/register` - Registration endpoint
 
 ### Current Status
 
-**Debugging Mode**: Authentication middleware and some routes are temporarily disabled for testing.
+**Debugging Mode**: Root route handler removed, added request logging and catch-all route for debugging. Authentication middleware disabled.
 
 ### Local Development
 
