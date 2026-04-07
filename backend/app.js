@@ -66,7 +66,12 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.use(authenticateUser);
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Test route working" });
+});
+
+
+// app.use(authenticateUser);
 app.use((req, res, next) => {
   const isApiRoute = req.path.startsWith("/api");
 
@@ -78,7 +83,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api', authRoutes);
+
+// app.use('/api', authRoutes);
 app.use('/api', catalogRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', paymentRoutes);

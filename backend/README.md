@@ -31,10 +31,16 @@ Set these in your Vercel project settings:
 
 ### API Endpoints
 
-After deployment, your API will be available at:
-- `https://your-project.vercel.app/api/login`
-- `https://your-project.vercel.app/api/register`
-- And other endpoints...
+After deployment, test these endpoints:
+
+- `https://your-app.vercel.app/api/health` - Health check
+- `https://your-app.vercel.app/api/test` - Test route
+- `https://your-app.vercel.app/api/login` - Login endpoint
+- `https://your-app.vercel.app/api/register` - Registration endpoint
+
+### Current Status
+
+**Debugging Mode**: Authentication middleware and some routes are temporarily disabled for testing.
 
 ### Local Development
 
