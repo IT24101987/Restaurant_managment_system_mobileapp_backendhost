@@ -17,6 +17,7 @@ import dishRoutes from "./routes/dishRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 let isDatabaseReady = false;
 
@@ -108,6 +109,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
-app.listen(config.port, () => {
-  console.log(`Server started on port ${config.port}`);
-});
+// Export the app for Vercel
+export default app;
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(config.port, () => {
+    console.log(`Server started on port ${config.port}`);
+  });
+}
