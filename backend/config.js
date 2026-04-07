@@ -1,12 +1,3 @@
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-// Always load backend/.env no matter where the process is started from
-dotenv.config({ path: path.join(__dirname, ".env") });
-
 const config = {
   mongodbURI: process.env.MONGODB_URI,
   jwtSecret: process.env.JWT_SECRET || "change-this-secret",
