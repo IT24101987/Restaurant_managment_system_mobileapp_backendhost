@@ -168,3 +168,35 @@ export async function reviewRefundRequest(req, res) {
     });
   }
 }
+
+export async function directRefundPayment(req, res) {
+  try {
+    const payment = await Payment.findById(req.params.id);
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    const status = String(payment.refundStatus || "").toLowerCase();
+    if (status === "approved") {
+      return res.status(400).json({ message: "Payment already refunded" });
+    }
+
+    if (!payment.refundRequestedAt) {
+      payment.refundRequestedAt = new Date();
+    }
+    payment.refundStatus = "approved";
+    payment.refundedAt = new Date();
+    payment.refundReviewedBy = req.user?.email || "system";
+    await payment.save();
+
+    res.json({
+      message: "Refund approved successfully",
+      payment
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to refund payment",
+      error: error.message
+    });
+  }
+}
