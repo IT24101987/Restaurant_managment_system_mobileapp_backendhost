@@ -80,35 +80,38 @@ export async function createOrder(req, res) {
     }
 
     let orderItems = [];
-    if (!items || items.length === 0) {
+    const hasItems = Array.isArray(items) && items.length > 0;
+    if (!hasItems && orderType !== "table") {
       return res.status(400).json({
         message: "items are required"
       });
     }
 
-    for (const item of items) {
-      if (!Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1) {
-        return res.status(400).json({ message: "Item quantity must be a positive integer" });
+    if (hasItems) {
+      for (const item of items) {
+        if (!Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1) {
+          return res.status(400).json({ message: "Item quantity must be a positive integer" });
+        }
       }
+
+      const dishIds = items.map(item => item.dishId);
+      const dishes = await Dish.find({ _id: { $in: dishIds } });
+
+      orderItems = items.map(item => {
+        const dish = dishes.find(d => d._id.toString() === item.dishId);
+
+        if (!dish) {
+          throw new Error("Invalid dish selected");
+        }
+
+        return {
+          dishId: dish._id,
+          name: dish.name,
+          quantity: item.quantity,
+          price: dish.price
+        };
+      });
     }
-
-    const dishIds = items.map(item => item.dishId);
-    const dishes = await Dish.find({ _id: { $in: dishIds } });
-
-    orderItems = items.map(item => {
-      const dish = dishes.find(d => d._id.toString() === item.dishId);
-
-      if (!dish) {
-        throw new Error("Invalid dish selected");
-      }
-
-      return {
-        dishId: dish._id,
-        name: dish.name,
-        quantity: item.quantity,
-        price: dish.price
-      };
-    });
 
     let normalizedSeatCount = Number(seatCount || 0);
     let resolvedReservationStart = null;

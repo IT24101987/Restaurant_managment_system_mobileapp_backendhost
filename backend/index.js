@@ -40,14 +40,10 @@ app.use(express.json({ limit: "15mb" }));
 
 // CORS — restrict to allowed origins
 const allowLocalhostPort = /^http:\/\/localhost:517\d$/;
-const fallbackFrontendOrigins = [
-  "https://restaurant-managment-system-webapp.onrender.com"
-];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     if (config.corsOrigins.includes(origin)) return callback(null, true);
-    if (fallbackFrontendOrigins.includes(origin)) return callback(null, true);
     if (allowLocalhostPort.test(origin)) return callback(null, true);
     return callback(new Error("CORS blocked"), false);
   },
