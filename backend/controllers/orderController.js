@@ -75,7 +75,7 @@ export async function createOrder(req, res) {
     const isManualTableBooking =
       Boolean(isManualBooking) && normalizedOrderType === "table";
     const initialPaymentStatus =
-      (normalizedOrderType === "delivery" || isManualTableBooking) &&
+      (normalizedOrderType === "delivery" || normalizedOrderType === "table" || isManualTableBooking) &&
       normalizedPaymentMethod === "card"
         ? "paid"
         : "unpaid";
