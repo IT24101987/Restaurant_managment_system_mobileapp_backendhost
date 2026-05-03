@@ -1,6 +1,7 @@
 import Order from "../models/order.js";
 import Payment from "../models/payment.js";
 
+const MANUAL_BOOKING_FEE = 250;
 
   // CREATE PAYMENT//
 
@@ -44,9 +45,13 @@ export async function createPayment(req, res) {
     }
 
     // Calculate subtotal
-    const subtotal = order.items.reduce((sum, item) => {
+    const itemsSubtotal = order.items.reduce((sum, item) => {
       return sum + (item.price * item.quantity);
     }, 0);
+    const subtotal =
+      Boolean(order.isManualBooking) && Number(itemsSubtotal || 0) <= 0
+        ? MANUAL_BOOKING_FEE
+        : itemsSubtotal;
 
     const rawDiscount =
       normalizedOfferType === "percent"
@@ -119,7 +124,7 @@ export async function getPaymentByOrderId(req, res) {
 export async function listPaidPayments(req, res) {
   try {
     const payments = await Payment.find()
-      .populate("orderId", "orderNumber orderType tableNumber customerName")
+      .populate("orderId", "orderNumber orderType tableNumber customerName items")
       .sort({ createdAt: -1 });
 
     res.json({ payments });
