@@ -12,6 +12,7 @@ import {
 } from "../utils/reservation.js";
 const ALLOWED_SEAT_COUNTS = [1, 2, 3, 4, 6, 8];
 const DELIVERY_FEE = 250;
+const TABLE_BOOKING_FEE = 250;
 
 //GET ALL ORDERS 
 
@@ -64,14 +65,18 @@ export async function createOrder(req, res) {
       reservationDate,
       reservationTime,
       reservationStart,
-      reservationDurationMin
+      reservationDurationMin,
+      isManualBooking
     } = req.body;
     const normalizedCustomerName = String(customerName || "").trim();
     const normalizedPhone = String(phone || "").replace(/\D/g, "");
     const normalizedPaymentMethod = String(paymentMethod || "cash").toLowerCase();
     const normalizedOrderType = String(orderType || "").toLowerCase();
+    const isManualTableBooking =
+      Boolean(isManualBooking) && normalizedOrderType === "table";
     const initialPaymentStatus =
-      normalizedOrderType === "delivery" && normalizedPaymentMethod === "card"
+      (normalizedOrderType === "delivery" || isManualTableBooking) &&
+      normalizedPaymentMethod === "card"
         ? "paid"
         : "unpaid";
 
@@ -89,12 +94,6 @@ export async function createOrder(req, res) {
     }
     if (!["cash", "card"].includes(normalizedPaymentMethod)) {
       return res.status(400).json({ message: "paymentMethod must be either cash or card" });
-    }
-
-    if (req.body.isManualBooking) {
-      return res.status(400).json({
-        message: "Manual table bookings must use the reservation endpoint"
-      });
     }
 
     let orderItems = [];
@@ -129,6 +128,18 @@ export async function createOrder(req, res) {
           price: dish.price
         };
       });
+    }
+    if (!hasItems && isManualTableBooking) {
+      if (normalizedPaymentMethod !== "card") {
+        return res.status(400).json({ message: "Card payment is required for table booking" });
+      }
+      orderItems = [
+        {
+          name: "Table Booking",
+          quantity: 1,
+          price: TABLE_BOOKING_FEE
+        }
+      ];
     }
     const itemsSubtotal = orderItems.reduce(
       (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
@@ -235,11 +246,12 @@ export async function createOrder(req, res) {
       paymentMethod: normalizedPaymentMethod,
       paymentStatus: initialPaymentStatus,
       totalAmount: orderTotalAmount,
+      isManualBooking: isManualTableBooking,
       items: orderItems,
       createdBy: req.user?.email || "system"
     });
 
-    if (normalizedOrderType === "delivery" && normalizedPaymentMethod === "card") {
+    if (initialPaymentStatus === "paid" && normalizedPaymentMethod === "card") {
       const payment = await Payment.create({
         paymentId: `PAY-${Date.now()}`,
         orderId: order._id,
