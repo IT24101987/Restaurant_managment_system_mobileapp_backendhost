@@ -65,12 +65,29 @@ export async function createOrder(req, res) {
       reservationStart,
       reservationDurationMin
     } = req.body;
+    const normalizedCustomerName = String(customerName || "").trim();
+    const normalizedPhone = String(phone || "").replace(/\D/g, "");
+    const normalizedPaymentMethod = String(paymentMethod || "cash").toLowerCase();
+    const normalizedOrderType = String(orderType || "").toLowerCase();
+    const initialPaymentStatus =
+      normalizedOrderType === "delivery" && normalizedPaymentMethod === "card"
+        ? "paid"
+        : "unpaid";
 
     // Basic validation
     if (!orderType || !timeSlotLabel) {
       return res.status(400).json({
         message: "orderType and timeSlotLabel are required"
       });
+    }
+    if (!normalizedCustomerName) {
+      return res.status(400).json({ message: "customerName is required" });
+    }
+    if (!/^\d{10}$/.test(normalizedPhone)) {
+      return res.status(400).json({ message: "phone must be exactly 10 digits" });
+    }
+    if (!["cash", "card"].includes(normalizedPaymentMethod)) {
+      return res.status(400).json({ message: "paymentMethod must be either cash or card" });
     }
 
     if (req.body.isManualBooking) {
@@ -205,10 +222,11 @@ export async function createOrder(req, res) {
           : undefined,
       tableNumber: req.body.tableNumber,
       seatCount: orderType === "table" ? normalizedSeatCount : seatCount,
-      customerName,
-      phone,
+      customerName: normalizedCustomerName,
+      phone: normalizedPhone,
       deliveryAddress,
-      paymentMethod,
+      paymentMethod: normalizedPaymentMethod,
+      paymentStatus: initialPaymentStatus,
       items: orderItems,
       createdBy: req.user?.email || "system"
     });
